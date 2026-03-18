@@ -23,12 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-  // API 설정 확인
-  if (!api.isConfigured()) {
-    showApiSetup();
-    return;
-  }
-
   // 탭 이벤트 등록
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -36,30 +30,8 @@ function initApp() {
 
   // 초기 데이터 로드
   loadMembers();
-  // 승률 통계 백그라운드 로드 (밸런스 추첨용)
   loadPlayerStats();
-  // 오늘 납부 기록 로드
   loadTodayPayments();
-}
-
-// API 설정 화면 표시
-function showApiSetup() {
-  document.getElementById('api-setup').classList.remove('hidden');
-  document.getElementById('main-app').classList.add('hidden');
-}
-
-function hideApiSetup() {
-  document.getElementById('api-setup').classList.add('hidden');
-  document.getElementById('main-app').classList.remove('hidden');
-}
-
-function saveApiUrl() {
-  const url = document.getElementById('api-url-input').value.trim();
-  if (!url) {
-    showToast('URL을 입력해주세요', 'error');
-    return;
-  }
-  api.setUrl(url);
 }
 
 // 탭 전환
@@ -85,13 +57,11 @@ async function loadMembers() {
     if (result.success) {
       appState.members = result.data;
       renderMemberList();
-      hideApiSetup();
     } else {
       showToast('회원 목록 로드 실패: ' + result.error, 'error');
     }
   } catch (err) {
-    showToast('서버 연결 실패. API URL을 확인하세요.', 'error');
-    showApiSetup();
+    showToast('서버 연결 실패', 'error');
   }
   showLoading(false);
 }
