@@ -3,7 +3,7 @@
  * 배포 URL을 아래에 설정하세요
  */
 
-const API_URL = localStorage.getItem('volleyball_api_url') || '';
+const API_URL = localStorage.getItem('volleyball_api_url') || 'https://script.google.com/macros/s/AKfycbxJXtBYb6FQS-2wpTsIqjioDj37Yu2sjcg_DexqYR3sWb6_3dpH20G2Mo1XtfnsmrlTGg/exec';
 
 const api = {
   // API URL 설정
