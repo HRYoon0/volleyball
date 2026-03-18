@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <title>황산 배구</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- 로딩 오버레이 -->
+  <div id="loading" class="loading-overlay hidden">
+    <div class="loading-content">
+      <div class="volleyball-spinner">
+        <div class="ball"></div>
+      </div>
+      <p class="loading-text">불러오는 중...</p>
+    </div>
+  </div>
+
+  <!-- 토스트 메시지 컨테이너 -->
+  <div id="toast-container"></div>
+
+  <!-- 헤더 -->
+  <header class="app-header">
+    <div class="header-bg-pattern"></div>
+    <div class="header-content">
+      <div class="header-title-row">
+        <h1>황산 배구</h1>
+        <button class="settings-btn" onclick="showApiSetup()" title="설정">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+      <p class="subtitle">매주 수요일 체육 활동</p>
+    </div>
+  </header>
+
+  <!-- API 설정 화면 -->
+  <div id="api-setup" class="api-setup hidden">
+    <div class="setup-icon">🏐</div>
+    <h2>황산 배구 시작하기</h2>
+    <p>Google Apps Script 배포 URL을 입력해주세요.</p>
+    <input type="url" id="api-url-input" class="form-input"
+           placeholder="https://script.google.com/macros/s/..." />
+    <button class="btn btn-primary btn-large" onclick="saveApiUrl()">연결하기</button>
+  </div>
+
+  <!-- 메인 앱 -->
+  <div id="main-app">
+    <!-- 탭 바 -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="members">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>참가자</span>
+      </button>
+      <button class="tab-btn" data-tab="teams">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <span>추첨</span>
+      </button>
+      <button class="tab-btn" data-tab="game">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>경기</span>
+      </button>
+      <button class="tab-btn" data-tab="stats">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>통계</span>
+      </button>
+    </nav>
+
+    <!-- 탭 1: 참가자 선택 -->
+    <div id="tab-members" class="tab-content">
+      <div class="member-section-header">
+        <h3>오늘의 참가자</h3>
+        <button id="btn-manage" class="btn btn-sm btn-ghost" onclick="toggleManageMode()">관리</button>
+      </div>
+
+      <p class="select-hint">참가할 선생님을 터치하세요</p>
+
+      <!-- 카운트 바 -->
+      <div class="member-count-bar">
+        <div class="count-chip">
+          <span class="count-num" id="selected-count">0</span>
+          <span class="count-label">선택</span>
+        </div>
+        <div class="count-chip count-male">
+          <span class="count-num" id="male-count">0</span>
+          <span class="count-label">남</span>
+        </div>
+        <div class="count-chip count-female">
+          <span class="count-num" id="female-count">0</span>
+          <span class="count-label">여</span>
+        </div>
+      </div>
+
+      <!-- 회원 목록 -->
+      <div id="member-list"></div>
+
+      <!-- 납부 요약 바 -->
+      <div id="payment-summary" class="payment-summary-bar hidden">
+        <div class="payment-header-row">
+          <span class="payment-icon">💰</span>
+          <span class="payment-title">납부 현황</span>
+        </div>
+        <div class="payment-counts">
+          <div class="pay-chip pay-done-chip">
+            <span id="paid-count">0</span>납부
+          </div>
+          <div class="pay-chip pay-undone-chip">
+            <span id="unpaid-count">0</span>미납
+          </div>
+        </div>
+        <p class="payment-hint">카드 오른쪽 ₩ 으로 납부 체크</p>
+      </div>
+
+      <!-- 액션 버튼 -->
+      <div class="member-actions">
+        <button class="btn btn-ghost" onclick="toggleAllMembers()">전체 선택</button>
+        <button class="btn btn-ghost" onclick="showAddMemberModal()">+ 추가</button>
+        <button class="btn btn-ghost" onclick="showBulkAddModal()">+ 일괄</button>
+      </div>
+
+      <button id="btn-draw-teams" class="btn btn-primary btn-large btn-glow" onclick="goToTeamDraw()" disabled>
+        팀 추첨하기
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <!-- 탭 2: 팀 추첨 -->
+    <div id="tab-teams" class="tab-content hidden">
+      <div id="team-draw-area">
+        <p class="empty-msg">참가자를 먼저 선택해주세요.</p>
+      </div>
+    </div>
+
+    <!-- 탭 3: 경기 -->
+    <div id="tab-game" class="tab-content hidden">
+      <div id="game-area">
+        <p class="empty-msg">팀을 추첨한 후 경기를 시작하세요.</p>
+      </div>
+    </div>
+
+    <!-- 탭 4: 통계 -->
+    <div id="tab-stats" class="tab-content hidden">
+      <div id="stats-area">
+        <p class="empty-msg">통계를 불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 회원 추가 모달 -->
+  <div id="add-member-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeAddMemberModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>회원 추가</h3>
+        <button class="modal-close" onclick="closeAddMemberModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">이름</label>
+        <input type="text" id="new-member-name" class="form-input" placeholder="이름 입력" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">성별</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="new-member-gender" value="남" />
+            <span class="gender-badge male">남</span> 남성
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="new-member-gender" value="여" />
+            <span class="gender-badge female">여</span> 여성
+          </label>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-large" onclick="saveMember()">추가하기</button>
+    </div>
+  </div>
+
+  <!-- 회원 일괄 추가 모달 -->
+  <div id="bulk-add-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeBulkAddModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>회원 일괄 추가</h3>
+        <button class="modal-close" onclick="closeBulkAddModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-desc">
+        한 줄에 한 명씩 입력하세요. 형식: <strong>이름,성별</strong>
+      </p>
+      <div class="form-group">
+        <textarea id="bulk-member-input" class="form-input form-textarea" rows="10"
+                  placeholder="홍길동,남&#10;김영희,여&#10;박철수,남"></textarea>
+      </div>
+      <button class="btn btn-primary btn-large" onclick="saveBulkMembers()">일괄 추가</button>
+    </div>
+  </div>
+
+  <!-- 지각 합류 모달 -->
+  <div id="late-arrival-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeLateArrivalModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>선수 추가 (지각 합류)</h3>
+        <button class="modal-close" onclick="closeLateArrivalModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-desc">추가할 선수를 선택하고 팀을 지정하세요.</p>
+      <div id="late-member-list"></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/members.js"></script>
+  <script src="js/teams.js"></script>
+  <script src="js/game.js"></script>
+
+</body>
+</html>
