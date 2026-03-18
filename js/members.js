@@ -9,11 +9,15 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// 최초 렌더링 여부 (애니메이션 제어용)
+let memberListRendered = false;
+
 // 회원 목록 렌더링 (안전한 DOM 조작)
 function renderMemberList() {
   const container = document.getElementById('member-list');
   container.textContent = '';
   const activeMembers = appState.members.filter(m => m.active);
+  const animate = !memberListRendered;
 
   if (activeMembers.length === 0) {
     const p = document.createElement('p');
@@ -35,9 +39,9 @@ function renderMemberList() {
     const isPaid = appState.paidIds.has(m.id);
 
     const card = document.createElement('div');
-    card.className = `member-card ${isSelected ? 'selected' : ''}`;
+    card.className = `member-card ${isSelected ? 'selected' : ''} ${animate ? '' : 'no-anim'}`;
     card.dataset.id = m.id;
-    card.style.animationDelay = `${idx * 0.03}s`;
+    if (animate) card.style.animationDelay = `${idx * 0.03}s`;
 
     // 메인 터치 영역 (선택/해제)
     const mainArea = document.createElement('div');
@@ -79,6 +83,7 @@ function renderMemberList() {
 
   updateMemberCount();
   renderPaymentSummary();
+  memberListRendered = true;
 }
 
 // 회원 선택 토글
